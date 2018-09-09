@@ -11,16 +11,13 @@
 <div class="chart-wrapper" id="chart-line1"></div>
 
 <script type="text/javascript">
+
     d3.dsv(";")('data_empl.csv', function(error, data) {
-    data.forEach(function (d) {});
+        var chart = makeLineChart(data, {yAxis: 'Množství'});
+        chart.bind("#chart-line1");
+        chart.render();
+    });
 
-
-
-    var chart = makeLineChart(data, {yAxis: 'Množství'});
-    chart.bind("#chart-line1");
-    chart.render();
-
-});
 </script>
 <script src="multiline.js" charset="utf-8"></script>
 </body>
