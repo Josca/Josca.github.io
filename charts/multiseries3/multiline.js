@@ -10,7 +10,7 @@ function makeLineChart(dataset, axisLables) {
     })
 
     var chartObj = {};
-    var color = d3.scale.category10();
+    var color = d3.scale.category20();
     chartObj.xAxisLable = axisLables.xAxis;
     chartObj.yAxisLable = axisLables.yAxis;
 
