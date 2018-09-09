@@ -155,7 +155,7 @@ function makeLineChart(dataset, axisLables) {
 
         for (var y  in yObjs) {
             yObjs[y].tooltip = focus.append("g");
-            yObjs[y].tooltip.append("circle").attr("r", 5);
+            yObjs[y].tooltip.append("circle").attr("r", 5).style("fill", color(y));
             yObjs[y].tooltip.append("rect").attr("x", 8).attr("y","-5").attr("width",22).attr("height",'0.75em');
             yObjs[y].tooltip.append("text").attr("x", 9).attr("dy", ".35em");
         }

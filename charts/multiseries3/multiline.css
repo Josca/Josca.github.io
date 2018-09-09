@@ -85,9 +85,6 @@
 }
 
 .chart-wrapper .focus circle {
-  fill: crimson;
-  stroke: crimson;
-  stroke-width: 2px;
   fill-opacity: 15%;
 }
 .chart-wrapper .focus rect {
