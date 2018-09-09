@@ -2,8 +2,10 @@
 <meta charset="utf-8">
 <style>
 
-.area {
-  fill: steelblue;
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 5px;
   clip-path: url(#clip);
 }
 
@@ -31,11 +33,9 @@ var zoom = d3.zoom()
     .extent([[0, 0], [width, height]])
     .on("zoom", zoomed);
 
-var area = d3.area()
-    .curve(d3.curveMonotoneX)
+var line = d3.line()
     .x(function(d) { return x(d.date); })
-    .y0(height)
-    .y1(function(d) { return y(d.price); });
+    .y(function(d) { return y(d.price); });
 
 svg.append("defs").append("clipPath")
     .attr("id", "clip")
@@ -54,8 +54,8 @@ d3.csv("data.csv", type, function(error, data) {
 
   g.append("path")
       .datum(data)
-      .attr("class", "area")
-      .attr("d", area);
+      .attr("class", "line")
+      .attr("d", line);
 
   g.append("g")
       .attr("class", "axis axis--x")
@@ -79,7 +79,7 @@ d3.csv("data.csv", type, function(error, data) {
 
 function zoomed() {
   var t = d3.event.transform, xt = t.rescaleX(x);
-  g.select(".area").attr("d", area.x(function(d) { return xt(d.date); }));
+  g.select(".line").attr("d", line.x(function(d) { return xt(d.date); }));
   g.select(".axis--x").call(xAxis.scale(xt));
 }
 
