@@ -1,4 +1,13 @@
-function makeLineChart(dataset, xName, yObjs, axisLables) {
+function makeLineChart(dataset, axisLables) {
+    xName = Object.keys(dataset[0])[0]
+
+    var yObjs = {}
+    Object.keys(dataset[0]).forEach(key => {
+      if (key != xName) {
+        yObjs[key] = {column: key}
+      }
+    })
+
     var chartObj = {};
     var color = d3.scale.category10();
     chartObj.xAxisLable = axisLables.xAxis;
@@ -177,6 +186,11 @@ function makeLineChart(dataset, xName, yObjs, axisLables) {
         }).on("mousemove", mousemove);
 
         return chartObj;
+
+        function capitalizeFirst(word) {
+          return word.slice(0,1).toUpperCase()+word.slice(1)
+        }
+
         function mousemove() {
             var x0 = chartObj.xScale.invert(d3.mouse(this)[0]), i = chartObj.bisectYear(dataset, x0, 1), d0 = chartObj.data[i - 1], d1 = chartObj.data[i];
             try {
@@ -190,7 +204,7 @@ function makeLineChart(dataset, xName, yObjs, axisLables) {
             }
 
             focus.select(".focus.line").attr("transform", "translate(" + chartObj.xScale(chartObj.xFunct(d)) + ")").attr("y1", minY);
-            focus.select(".focus.year").text("Rok: " + chartObj.xFormatter(chartObj.xFunct(d)));
+            focus.select(".focus.year").text(capitalizeFirst(xName) + ": " + chartObj.xFormatter(chartObj.xFunct(d)));
         }
 
     };
