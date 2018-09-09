@@ -156,7 +156,7 @@ function makeLineChart(dataset, axisLables) {
         for (var y  in yObjs) {
             yObjs[y].tooltip = focus.append("g");
             yObjs[y].tooltip.append("circle").attr("r", 5).style("fill", color(y));
-            yObjs[y].tooltip.append("rect").attr("x", 8).attr("y","-5").attr("width",22).attr("height",'0.75em');
+            yObjs[y].tooltip.append("rect").attr("x", 8).attr("y","-5").attr("width",22).attr("height",'0.75em').style("fill", color(y)).style("stroke", color(y))
             yObjs[y].tooltip.append("text").attr("x", 9).attr("dy", ".35em");
         }
 
@@ -196,6 +196,11 @@ function makeLineChart(dataset, axisLables) {
             for (var y  in yObjs) {
                 yObjs[y].tooltip.attr("transform", "translate(" + chartObj.xScale(chartObj.xFunct(d)) + "," + chartObj.yScale(yObjs[y].yFunct(d)) + ")");
                 yObjs[y].tooltip.select("text").text(chartObj.yFormatter(yObjs[y].yFunct(d)));
+                var bbox = yObjs[y].tooltip.select("text").node().getBBox();
+                var rectNode = yObjs[y].tooltip.select("rect").node();
+                rectNode.setAttribute("width", bbox.width);
+                rectNode.setAttribute("height", bbox.height);
+
                 minY = Math.min(minY, chartObj.yScale(yObjs[y].yFunct(d)));
             }
 

@@ -73,7 +73,6 @@
     height: 1em;
     width: 1em;
     border-radius: 35%;
-    background-color: crimson;
     display: inline-block;
     margin-right: 4px;
     margin-bottom: -0.16rem;
@@ -87,11 +86,12 @@
 .chart-wrapper .focus circle {
   fill-opacity: 15%;
 }
+
 .chart-wrapper .focus rect {
-    fill: lightblue;
     opacity: 0.4;
-    border-radius: 2px;
+    stroke-width: 3;
 }
+
 .chart-wrapper .focus.line {
     stroke: steelblue;
     stroke-dasharray: 2,5;
