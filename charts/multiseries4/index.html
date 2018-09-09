@@ -66,15 +66,12 @@ d3.csv("data.csv", type, function(error, data) {
       .attr("class", "axis axis--y")
       .call(yAxis);
 
-  var d0 = new Date(2003, 0, 1),
-      d1 = new Date(2004, 0, 1);
-
-  // Gratuitous intro zoom!
-  svg.call(zoom).transition()
-      .duration(1500)
-      .call(zoom.transform, d3.zoomIdentity
-          .scale(width / (x(d1) - x(d0)))
-          .translate(-x(d0), 0));
+// Gratuitous intro zoom!
+svg.call(zoom).transition()
+    .duration(1500)
+    .call(zoom.transform, d3.zoomIdentity
+        .scale(width / (x(d1) - x(d0)))
+        .translate(-x(d0), 0));
 });
 
 function zoomed() {
