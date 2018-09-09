@@ -31,11 +31,13 @@ function makeLineChart(dataset, axisLables) {
 
 // Object instead of array
     chartObj.yFuncts = [];
-    for (var y  in yObjs) {
+    for (var y in yObjs) {
         yObjs[y].name = y;
         yObjs[y].yFunct = getYFn(yObjs[y].column); //Need this  list for the ymax function
         chartObj.yFuncts.push(yObjs[y].yFunct);
     }
+
+
 
 //Formatter functions for the axes
     chartObj.formatAsNumber = d3.format(".0f");
@@ -62,7 +64,9 @@ function makeLineChart(dataset, axisLables) {
     chartObj.max = function (fn) {
         return d3.max(chartObj.data, fn);
     };
-    chartObj.yScale = d3.scale.linear().range([chartObj.height, 0]).domain([0, d3.max(chartObj.yFuncts.map(chartObj.max))]);
+
+    let maxY = d3.max(dataset.map(row => d3.max(Object.keys(yObjs).map(k => parseInt(row[k])))))
+    chartObj.yScale = d3.scale.linear().range([chartObj.height, 0]).domain([0, maxY]);
 
     chartObj.formatAsYear = d3.format("");
 
