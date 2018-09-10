@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 5px;
+  clip-path: url(#clip);
+}
+
+</style>
+<script src="../../js/d3.v4.min.js"></script>
+
+<body>
+<script>
+
+var width = 500,
+    height = 500;
+
+var svg = d3.select("body")
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height)
+
+var data = [
+  {x: 10, y: 30},
+  {x: 40, y: 20},
+  {x: 50, y: 18},
+  {x: 90, y: 80}
+];
+
+
+var line = d3.line()
+              .x(function (d) { return d.x; })
+              .y(function (d) { return d.y; });
+
+svg.append("g")
+  .attr("transform", "translate(100,100)") // Not neccassary
+  .selectAll("path")
+  .data([data])
+    .enter()
+      .append("path")
+        .attr("d", line)
+        .attr("stroke", "blue")
+        .attr("fill", "none")
+        .attr("stroke-width", 3);
+
+</script>
+</body>
