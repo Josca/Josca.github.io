@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 5px;
+  clip-path: url(#clip);
+}
+
+</style>
+<script src="../../js/d3.v4.min.js"></script>
+
+<body>
+<script>
+
+var width = 500,
+    height = 500;
+
+var svg = d3.select("body")
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height)
+
+var group = svg.append("g")
+                .attr("transform", "translate(100,100)") // Not neccassary
+
+var r = 100;
+var p = Math.PI * 2;
+
+var arc = d3.arc()
+              .innerRadius(r - 20)
+              .outerRadius(r)
+              .startAngle(0)
+              .endAngle(p - Math.PI / 2); // Angles are in radians.
+
+group.append("path")
+  .attr("d", arc);
+
+</script>
+</body>
