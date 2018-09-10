@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 5px;
+  clip-path: url(#clip);
+}
+
+</style>
+<svg width="960" height="500"></svg>
+<script src="../../js/d3.v4.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom;
+
+var arr = [20, 40, 50];
+
+var bars = svg.selectAll("rect") // There is no rectangle yet
+            .data(arr)           // Bind array data to selected elements (rects)
+            .enter()             // Create placeholders (rects) for not-binded data.
+              .append("rect")
+                .attr("width", function(d) { return d; }) // Function of data.
+                .attr("height", 50)
+                .attr("y", function(d, i) { return i * 60}); // Function of data and its index.
+
+</script>
