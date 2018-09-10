@@ -24,6 +24,7 @@ var svg = d3.select("body")
               .attr("height", height)
                 .append("g")
                   .attr("transform", "translate(50,50)");  // Only works when added directly when creating.
+var hBar = 60;
 
 var arr = [30, 20, 50, 60];
 
@@ -41,8 +42,14 @@ var bars = svg.selectAll("rect") // There is no rectangle yet
               .append("rect")
                 .attr("width", function(d) { return wScale(d); }) // Function of data.
                 .attr("height", 50)
-                .attr("y", function(d, i) { return i * 60})   // Function of data and i
+                .attr("y", function(d, i) { return i * hBar})   // Function of data and i
                 .attr("fill", function(d) { return color(d)});
+
+var axis = d3.axisBottom(wScale); //.ticks(5)  // Possible to set ticks.
+
+svg.append("g")
+  .attr("transform", "translate(0," + (arr.length * hBar).toString()  +")")
+  .call(axis);
 
 </script>
 </body>
