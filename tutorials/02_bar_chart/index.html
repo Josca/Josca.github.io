@@ -19,11 +19,15 @@ var svg = d3.select("svg"),
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom;
 
-var arr = [20, 20, 50, 600];
+var arr = [20, 20, 50, 60];
 
 var wScale = d3.scaleLinear()
                 .domain([0, d3.max(arr)])  // Min and max value of data
                 .range([0, width])         // Min and max coordinates
+
+var color = d3.scaleLinear()
+                .domain([0, d3.max(arr)])  // Min and max value of data
+                .range(["red", "blue"])         // Min and max coordinates
 
 var bars = svg.selectAll("rect") // There is no rectangle yet
             .data(arr)           // Bind array data to selected elements (rects)
@@ -31,6 +35,7 @@ var bars = svg.selectAll("rect") // There is no rectangle yet
               .append("rect")
                 .attr("width", function(d) { return wScale(d); }) // Function of data.
                 .attr("height", 50)
-                .attr("y", function(d, i) { return i * 60}); // Function of data and i
+                .attr("y", function(d, i) { return i * 60})   // Function of data and i
+                .attr("fill", function(d) { return color(d)});
 
 </script>
