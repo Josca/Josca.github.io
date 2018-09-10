@@ -9,6 +9,10 @@
   clip-path: url(#clip);
 }
 
+.circle {
+  fill: steelblue;
+}
+
 </style>
 <svg width="960" height="500"></svg>
 <script src="../../js/d3.v4.min.js"></script>
@@ -57,6 +61,22 @@ d3.csv("data.csv", type, function(error, data) {
       .attr("class", "line")
       .attr("d", line);
 
+  var r = 4;
+  var rFocus = 6;
+  g.selectAll("circle")
+    .data(data)
+      .enter()
+        .append("circle")
+          .attr("class", "circle")
+          .attr("r", r)
+          .attr("cx", function (d) { return x(d.date); })
+          .attr("cy", function (d) { return y(d.price); })
+          .on("mouseover", function (d) {
+              this.setAttribute("r", rFocus);
+          }).on("mouseout", function () {
+              this.setAttribute("r", r);
+          });
+
   g.append("g")
       .attr("class", "axis axis--x")
       .attr("transform", "translate(0," + height + ")")
@@ -71,8 +91,10 @@ d3.csv("data.csv", type, function(error, data) {
 });
 
 function zoomed() {
-  var t = d3.event.transform, xt = t.rescaleX(x);
+  var t = d3.event.transform,
+      xt = t.rescaleX(x);
   g.select(".line").attr("d", line.x(function(d) { return xt(d.date); }));
+  g.selectAll(".circle").attr("cx", function (d) { return xt(d.date); });
   g.select(".axis--x").call(xAxis.scale(xt));
 }
 
