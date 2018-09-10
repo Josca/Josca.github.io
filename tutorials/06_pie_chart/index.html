@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 5px;
+  clip-path: url(#clip);
+}
+
+</style>
+<script src="../../js/d3.v4.min.js"></script>
+
+<body>
+<script>
+
+var width = 500,
+    height = 500;
+
+var svg = d3.select("body")
+              .append("svg")
+              .attr("width", width)
+              .attr("height", height)
+
+var group = svg.append("g")
+                .attr("transform", "translate(300,300)") // Not neccassary
+
+var data = [10, 20, 75];
+
+var r = 200;
+
+var arc = d3.arc()
+              .innerRadius(r - 100)
+              .outerRadius(r);
+
+var color = d3.scaleOrdinal().range(["red", "blue", "orange"]);
+
+var pie = d3.pie()
+              .sort(null)
+              .value(function (d) { return d; });
+
+var arcs = group.selectAll(".arc") // select all elements of arc class.
+            .data(pie(data))
+            .enter()
+              .append("g")
+                .attr("class", "arc");
+
+arcs.append("path")
+  .attr("d", arc)
+  .style("fill", function (d) { return color(d.data); });
+
+
+arcs.append("text")
+  .attr("transform", function (d) { return "translate(" + arc.centroid(d) + ")"; })
+  .attr("text-anchor", "middle")
+  .attr("font-size", "1.5em")
+  .text(function (d) { return d.data; });
+
+</script>
+</body>
