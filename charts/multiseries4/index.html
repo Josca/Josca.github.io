@@ -15,6 +15,7 @@
 
 .circle {
   fill: steelblue;
+  clip-path: url(#clip);
 }
 
 </style>
@@ -45,7 +46,7 @@ var line = d3.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.price); });
 
-svg.append("defs").append("clipPath")
+svg.append("defs").append("clipPath")  // Define chart range
     .attr("id", "clip")
   .append("rect")
     .attr("width", width)
