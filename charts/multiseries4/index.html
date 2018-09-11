@@ -18,7 +18,21 @@
   clip-path: url(#clip);
 }
 
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 5px;
+    font: 12px sans-serif;
+    background: #ffffff;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #00000;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
 </style>
+<body>
 <svg width="960" height="500"></svg>
 <script src="../../js/d3.v4.min.js"></script>
 <script>
@@ -55,6 +69,11 @@ svg.append("defs").append("clipPath")  // Define chart range
 var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+// Define the div for the tooltip
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0.8);
+
 d3.csv("data.csv", type, function(error, data) {
   if (error) throw error;
 
@@ -75,19 +94,17 @@ d3.csv("data.csv", type, function(error, data) {
           .attr("cx", function (d) { return x(d.date); })
           .attr("cy", function (d) { return y(d.price); })
           .on("mouseover", function (d) {
-              tooltip.attr("transform", "translate(" + this.getAttribute("cx")  + "," + this.getAttribute("cy")+ ")");
-              tooltip.select("text").text(d.price);
-              focus.style("display", null);
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div.html(d.date + "<br/>"  + d.price)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
           }).on("mouseout", function () {
-              focus.style("display", "none");
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
           });
-
-var focus = g.append("g").style("display", "none");
-var tooltip = focus.append("g");
-    tooltip.append("circle")
-      .attr("r", 8)
-      .attr("class", "circle")
-    tooltip.append("text").attr("x", 9).attr("dy", ".35em");
 
   g.append("g")
       .attr("class", "axis axis--x")
@@ -120,3 +137,4 @@ function type(d) {
 }
 
 </script>
+</body>
