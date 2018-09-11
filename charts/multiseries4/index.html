@@ -85,15 +85,18 @@ d3.csv("data.csv", type, function(error, data) {
       .attr("class", "line")
       .attr("d", line);
 
+  var r = 4;
+  var rFocus = 8;
   g.selectAll("circle")
     .data(data)
       .enter()
         .append("circle")
           .attr("class", "circle")
-          .attr("r", 4)
+          .attr("r", r)
           .attr("cx", function (d) { return x(d.date); })
           .attr("cy", function (d) { return y(d.price); })
           .on("mouseover", function (d) {
+            this.setAttribute("r", rFocus);
             div.transition()
                 .duration(200)
                 .style("opacity", .9);
@@ -101,6 +104,7 @@ d3.csv("data.csv", type, function(error, data) {
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
           }).on("mouseout", function () {
+            this.setAttribute("r", r);
             div.transition()
                 .duration(500)
                 .style("opacity", 0);
