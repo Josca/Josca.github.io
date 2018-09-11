@@ -28,7 +28,9 @@ var svg = d3.select("svg"),
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom;
 
-var parseDate = d3.timeParse("%b %Y");
+var parseDate = d3.timeParse("%b %Y"),
+    bisectDate = d3.bisector(function(d) { return d.date; }).left;
+    // src: http://www.d3noob.org/2014/07/my-favourite-tooltip-method-for-line.html
 
 var x = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]);
@@ -98,8 +100,39 @@ var tooltip = focus.append("g");
       .attr("class", "axis axis--y")
       .call(yAxis);
 
+// append the circle at the intersection               // **********
+focus.append("circle")                                 // **********
+    .attr("class", "circle")                                // **********
+    .style("fill", "none")                             // **********
+    .style("stroke", "blue")                           // **********
+    .attr("r", 10);                                     // **********
+
+  // append the rectangle to capture mouse             // **********
+g.append("rect")                                       // **********
+    .attr("width", width)                              // **********
+    .attr("height", height)                            // **********
+    .style("fill", "none")                             // **********
+    .style("pointer-events", "all")                    // **********
+    .on("mouseover", function() { focus.style("display", null); })
+    .on("mouseout", function() { focus.style("display", "none"); })
+    .on("mousemove", mousemove);
+
   // Gratuitous intro zoom!
   svg.call(zoom).transition()
+
+  function mousemove() {                                 // **********
+        var x0 = x.invert(d3.mouse(this)[0]),              // **********
+            i = bisectDate(data, x0, 1),                   // **********
+            d0 = data[i - 1],                              // **********
+            d1 = data[i],                                  // **********
+            d = x0 - d0.date > d1.date - x0 ? d1 : d0;     // **********
+
+        focus.select("circle")                           // **********
+            .attr("transform",                             // **********
+                  "translate(" + x(d.date) + "," +         // **********
+                                 y(d.price) + ")");        // **********
+
+    }
 });
 
 function zoomed() {
