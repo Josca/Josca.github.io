@@ -4,7 +4,6 @@
 
 .line {
   fill: none;
-  stroke: steelblue;
   stroke-width: 4px;
   clip-path: url(#clip);
 }
@@ -14,7 +13,6 @@
 }
 
 .circle {
-  fill: steelblue;
   clip-path: url(#clip);
 }
 
@@ -77,13 +75,18 @@ var div = d3.select("body").append("div")
 d3.csv("data.csv", type, function(error, data) {
   if (error) throw error;
 
+  var colors = d3.schemeCategory20;
+
   x.domain(d3.extent(data, function(d) { return d.date; }));
   y.domain([0, d3.max(data, function(d) { return d.price; })]);
+
+  var color = colors[2];
 
   g.append("path")
       .datum(data)
       .attr("class", "line")
-      .attr("d", line);
+      .attr("d", line)
+      .style("stroke", color)
 
   var r = 4;
   var rFocus = 8;
@@ -92,6 +95,7 @@ d3.csv("data.csv", type, function(error, data) {
       .enter()
         .append("circle")
           .attr("class", "circle")
+          .attr("fill", color)
           .attr("r", r)
           .attr("cx", function (d) { return x(d.date); })
           .attr("cy", function (d) { return y(d.price); })
