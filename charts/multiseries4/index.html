@@ -40,7 +40,7 @@ var svg = d3.select("svg"),
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom;
 
-var parseDate = d3.timeParse("%b %Y");
+var parseDate = d3.timeParse("%Y");
 
 var x = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]);
@@ -72,8 +72,11 @@ var div = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0.8);
 
-d3.csv("data.csv", type, function(error, data) {
+d3.text("data_empl.csv", function(error, raw) {
   if (error) throw error;
+  var dsv = d3.dsvFormat(";");
+  var data = dsv.parse(raw).map(d => {
+    return {date: parseDate(d.date), price: d.price}});
 
   var colors = d3.schemeCategory20;
 
@@ -104,7 +107,7 @@ d3.csv("data.csv", type, function(error, data) {
             div.transition()
                 .duration(200)
                 .style("opacity", .9);
-            div.html(d.date + "<br/>"  + d.price)
+            div.html("Rok: " + d3.timeFormat("%Y")(d.date) + "<br/>Cena: " + d.price)
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
           }).on("mouseout", function () {
@@ -136,12 +139,6 @@ function zoomed() {
       if (d) { return xt(d.date); }
     });
   g.select(".axis--x").call(xAxis.scale(xt));
-}
-
-function type(d) {
-  d.date = parseDate(d.date);
-  d.price = +d.price;
-  return d;
 }
 
 </script>
