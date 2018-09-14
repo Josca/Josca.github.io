@@ -48,15 +48,11 @@ var x = d3.scaleTime().range([0, width]),
 var xAxis = d3.axisBottom(x),
     yAxis = d3.axisLeft(y);
 
-var zoom = d3.zoom()
-    .scaleExtent([1, 32])
-    .translateExtent([[0, 0], [width, height]])
-    .extent([[0, 0], [width, height]])
-    .on("zoom", zoomed);
-
-var line = d3.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.price); });
+function createLine(xKey, yKey) {
+  return d3.line()
+      .x(function(d) { return x(d[xKey]); })
+      .y(function(d) { return y(d[yKey]); });
+}
 
 svg.append("defs").append("clipPath")  // Define chart range
     .attr("id", "clip")
@@ -74,49 +70,67 @@ var div = d3.select("body").append("div")
 
 d3.text("data_empl.csv", function(error, raw) {
   if (error) throw error;
-  var dsv = d3.dsvFormat(";");
-  var data = dsv.parse(raw).map(d => {
-    return {date: parseDate(d.date), price: d.price}});
+
+  var data = d3.dsvFormat(";").parse(raw);
+  var keys = Object.keys(data[0]);
+  var xKey = keys[0];
+  data = data.map(row => {
+    row[xKey] = parseDate(row[xKey]);
+    return row;
+  });
 
   var colors = d3.schemeCategory20;
 
-  x.domain(d3.extent(data, function(d) { return d.date; }));
-  var maxY = d3.max(data, function(d) { return d.price; });
-  y.domain([0, maxY * 1.1]);
+  var yObjs = [];
 
-  var color = colors[2];
+  for(var i=1; i<keys.length; i++) {
+    var yKey = keys[i];
+    var line = createLine(xKey, yKey);
 
-  g.append("path")
-      .datum(data)
-      .attr("class", "line")
-      .attr("d", line)
-      .style("stroke", color)
+    x.domain(d3.extent(data, function(d) { return d[xKey]; }));
+    var maxY = d3.max(data, function(d) { return d.price; });
+    y.domain([0, maxY * 1.1]);
 
-  var r = 4;
-  var rFocus = 8;
-  g.selectAll("circle")
-    .data(data)
-      .enter()
-        .append("circle")
-          .attr("class", "circle")
-          .attr("fill", color)
-          .attr("r", r)
-          .attr("cx", function (d) { return x(d.date); })
-          .attr("cy", function (d) { return y(d.price); })
-          .on("mouseover", function (d) {
-            this.setAttribute("r", rFocus);
-            div.transition()
-                .duration(200)
-                .style("opacity", .9);
-            div.html("Rok: " + d3.timeFormat("%Y")(d.date) + "<br/>Cena: " + d.price)
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-          }).on("mouseout", function () {
-            this.setAttribute("r", r);
-            div.transition()
-                .duration(500)
-                .style("opacity", 0);
-          });
+    var color = colors[i];
+
+    var path = g.append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("d", line)
+                .style("stroke", color)
+
+    yObjs.push({
+      line: line,
+      yKey: yKey,
+      path: path
+    });
+
+    // var r = 4;
+    // var rFocus = 8;
+    // g.selectAll("circle")
+    //   .data(data)
+    //     .enter()
+    //       .append("circle")
+    //         .attr("class", "circle")
+    //         .attr("fill", color)
+    //         .attr("r", r)
+    //         .attr("cx", function (d) { return x(d.date); })
+    //         .attr("cy", function (d) { return y(d.price); })
+    //         .on("mouseover", function (d) {
+    //           this.setAttribute("r", rFocus);
+    //           div.transition()
+    //               .duration(200)
+    //               .style("opacity", .9);
+    //           div.html("Rok: " + d3.timeFormat("%Y")(d.date) + "<br/>Cena: " + d.price)
+    //               .style("left", (d3.event.pageX) + "px")
+    //               .style("top", (d3.event.pageY - 28) + "px");
+    //         }).on("mouseout", function () {
+    //           this.setAttribute("r", r);
+    //           div.transition()
+    //               .duration(500)
+    //               .style("opacity", 0);
+    //         });
+  }
 
   g.append("g")
       .attr("class", "axis axis--x")
@@ -127,19 +141,29 @@ d3.text("data_empl.csv", function(error, raw) {
       .attr("class", "axis axis--y")
       .call(yAxis);
 
+  var zoom = d3.zoom()
+      .scaleExtent([1, 32])
+      .translateExtent([[0, 0], [width, height]])
+      .extent([[0, 0], [width, height]])
+      .on("zoom", function () { return zoomed(yObjs, xKey); });
+
   // Gratuitous intro zoom!
   svg.call(zoom).transition()
 });
 
-function zoomed() {
-  var t = d3.event.transform,
-      xt = t.rescaleX(x);
-  g.select(".line").attr("d", line.x(function(d) { return xt(d.date); }));
-  g.selectAll(".circle")
-    .attr("cx", function (d) {
-      if (d) { return xt(d.date); }
-    });
-  g.select(".axis--x").call(xAxis.scale(xt));
+function zoomed(yObjs, xKey) {
+  yObjs.forEach(function(yObj) {
+    var t = d3.event.transform,
+        xt = t.rescaleX(x);
+    yObj.path.attr("d", yObj.line.x(function(d) {
+      return xt(d[xKey]);
+    }));
+  // g.selectAll(".circle")
+  //   .attr("cx", function (d) {
+  //     if (d) { return xt(d[yObj.yKey]); }
+  //   });
+    g.select(".axis--x").call(xAxis.scale(xt));
+  })
 }
 
 </script>
