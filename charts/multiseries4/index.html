@@ -35,11 +35,13 @@ div.tooltip {
 <script src="../../js/d3.v4.min.js"></script>
 <script>
 
+// Create svg object to draw on.
 var svg = d3.select("svg"),
-    margin = {top: 20, right: 20, bottom: 30, left: 40},
+    margin = {top: 20, right: 20, bottom: 30, left: 80},
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom;
 
+// x-value parsing method
 var parseDate = d3.timeParse("%Y");
 
 var x = d3.scaleTime().range([0, width]),
@@ -48,12 +50,21 @@ var x = d3.scaleTime().range([0, width]),
 var xAxis = d3.axisBottom(x),
     yAxis = d3.axisLeft(y);
 
+// Create line object for chart drawing.
 function createLine(xKey, yKey) {
   return d3.line()
       .x(function(d) { return x(d[xKey]); })
       .y(function(d) { return y(d[yKey]); });
 }
 
+// Calculate max y value from all non-x columns.
+function maxY(data) {
+  var keys = Object.keys(data[0]);
+  var res = d3.max(keys.slice(1).map(yKey => d3.max(data.map(row => row[yKey]))));
+  return res;
+}
+
+// Define chart area (not to overlap drawing for axes).
 svg.append("defs").append("clipPath")  // Define chart range
     .attr("id", "clip")
   .append("rect")
@@ -76,8 +87,14 @@ d3.text("data_empl.csv", function(error, raw) {
   var xKey = keys[0];
   data = data.map(row => {
     row[xKey] = parseDate(row[xKey]);
+    keys.slice(1).forEach(yKey => {
+      row[yKey] = parseInt(row[yKey]);
+    })
     return row;
   });
+
+  var maxy = maxY(data);
+  y.domain([0, maxy * 1.1]);
 
   var colors = d3.schemeCategory20;
 
@@ -88,8 +105,6 @@ d3.text("data_empl.csv", function(error, raw) {
     var line = createLine(xKey, yKey);
 
     x.domain(d3.extent(data, function(d) { return d[xKey]; }));
-    var maxY = d3.max(data, function(d) { return d.price; });
-    y.domain([0, maxY * 1.1]);
 
     var color = colors[i];
 
