@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <body>
-<svg width="960" height="500"></svg>
+<!-- <svg width="960" height="500"></svg> -->
 <link rel="stylesheet" type="text/css" href="style.css">
 <script src="../../js/d3.v4.min.js"></script>
 <script>
 
 // Create svg object to draw on.
-var svg = d3.select("svg"),
-    margin = {top: 20, right: 20, bottom: 30, left: 80},
-    width = +svg.attr("width") - margin.left - margin.right,
-    height = +svg.attr("height") - margin.top - margin.bottom;
+var margin = {top: 20, right: 400, bottom: 30, left: 80},
+    width = 800,
+    height = 500
+
+var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
 
 // x-value parsing method
 var parseDate = d3.timeParse("%Y");
@@ -80,13 +83,28 @@ d3.text("data_empl.csv", function(error, raw) {
 
     var color = colors[i];
 
-    var g = gax.append("g");
+    var yObj = {
+      line: line,
+      yKey: yKey,
+      visible: true,
+      color: color
+    }
+    yObjs.push(yObj);
 
-    g.append("path")
-      .datum(data)
-      .attr("class", "line")
-      .attr("d", line)
-      .style("stroke", color)
+    var g = gax.append("g")
+              .attr("class", "y_grp")
+              .attr("yObj", yObj)
+
+    yObj.g = g;
+
+    g.selectAll("path")
+      .data([yObj])
+        .enter()
+          .append("path")
+            .datum(data)
+            .attr("class", "line")
+            .attr("d", line)
+            .style("stroke", color)
 
     var r = 4;
     var rFocus = 8;
@@ -115,13 +133,47 @@ d3.text("data_empl.csv", function(error, raw) {
                  .duration(500)
                  .style("opacity", 0);
             });
-
-    yObjs.push({
-      line: line,
-      yKey: yKey,
-      g: g
-    });
   }
+
+// add legend
+  var legend = svg.append("g")
+
+  legend.selectAll("rect")
+    .data(yObjs)
+    .enter()
+      .append("rect")
+      .attr("width", 10)
+      .attr("height", 10)
+      .attr("x", width + margin.left + 30)
+      .attr("y", function(d,i) { return i * 20 + 50; })
+      .attr("fill", function(d) {
+        return d.visible ? d.color : "#f1f1f1";
+      })
+      .on("click", function(d) {
+        d.visible = !d.visible;
+
+        legend.selectAll("rect")
+          .transition()
+          .attr("fill", function(d) {
+            return d.visible ? d.color : "#f1f1f1";
+          });
+
+        if (d.visible) {
+          d.g.style("visibility", "visible");
+        } else{
+          d.g.style("visibility", "hidden");
+        }
+      });
+
+  legend.selectAll("text")
+    .data(yObjs)
+    .enter()
+      .append("text")
+      .attr("width", 10)
+      .attr("height", 10)
+      .attr("x", width + margin.left + 30 + 15)
+      .attr("y", function(d, i) { return i * 20 + 10 + 50; })
+      .text(d => { return d.yKey; });
 
   gax.append("g")
       .attr("class", "axis axis--x")
