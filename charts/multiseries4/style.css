@@ -1,0 +1,27 @@
+
+.line {
+  fill: none;
+  stroke-width: 4px;
+  clip-path: url(#clip);
+}
+
+.line:hover {
+  stroke-width: 6px;
+}
+
+.circle {
+  clip-path: url(#clip);
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 5px;
+    font: 12px sans-serif;
+    background: #ffffff;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #00000;
+    border-radius: 8px;
+    pointer-events: none;
+}
