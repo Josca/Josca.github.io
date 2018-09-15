@@ -71,20 +71,21 @@ svg.append("defs").append("clipPath")  // Define chart range
     .attr("width", width)
     .attr("height", height);
 
-var g = svg.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
 // Define the div for the tooltip
 var div = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0.8);
 
+var gax = svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
 d3.text("data_empl.csv", function(error, raw) {
   if (error) throw error;
 
   var data = d3.dsvFormat(";").parse(raw);
-  var keys = Object.keys(data[0]);
-  var xKey = keys[0];
+  var keys = Object.keys(data[0]); // get columns names
+  var xKey = keys[0];              // get x-column name
+  // convert values to numbers
   data = data.map(row => {
     row[xKey] = parseDate(row[xKey]);
     keys.slice(1).forEach(yKey => {
@@ -108,51 +109,55 @@ d3.text("data_empl.csv", function(error, raw) {
 
     var color = colors[i];
 
-    var path = g.append("path")
-                .datum(data)
-                .attr("class", "line")
-                .attr("d", line)
-                .style("stroke", color)
+    var g = gax.append("g");
+
+    g.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", line)
+      .style("stroke", color)
+
+    var r = 4;
+    var rFocus = 8;
+    g.selectAll("circle")
+      .data(data)
+        .enter()
+          .append("circle")
+            .attr("class", "circle")
+            .attr("fill", color)
+            .attr("r", r)
+            .attr("cx", function (d) { return x(d.date); })
+            .attr("cy", function (d) { return y(d[yKey]); })
+            .attr("label", yKey)  // save label here to show in tooltip
+            .on("mouseover", function (d) {  // mouseover handler
+              this.setAttribute("r", rFocus);
+              div.transition()
+                  .duration(200)
+                  .style("opacity", .9);
+              div.html("Rok: " + d3.timeFormat("%Y")(d.date) +
+                  "<br/>" + this.getAttribute("label") + ": " + d[yKey])
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY - 28) + "px");
+            }).on("mouseout", function () { // mouseout handler
+              this.setAttribute("r", r);
+              div.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+            });
 
     yObjs.push({
       line: line,
       yKey: yKey,
-      path: path
+      g: g
     });
-
-    // var r = 4;
-    // var rFocus = 8;
-    // g.selectAll("circle")
-    //   .data(data)
-    //     .enter()
-    //       .append("circle")
-    //         .attr("class", "circle")
-    //         .attr("fill", color)
-    //         .attr("r", r)
-    //         .attr("cx", function (d) { return x(d.date); })
-    //         .attr("cy", function (d) { return y(d.price); })
-    //         .on("mouseover", function (d) {
-    //           this.setAttribute("r", rFocus);
-    //           div.transition()
-    //               .duration(200)
-    //               .style("opacity", .9);
-    //           div.html("Rok: " + d3.timeFormat("%Y")(d.date) + "<br/>Cena: " + d.price)
-    //               .style("left", (d3.event.pageX) + "px")
-    //               .style("top", (d3.event.pageY - 28) + "px");
-    //         }).on("mouseout", function () {
-    //           this.setAttribute("r", r);
-    //           div.transition()
-    //               .duration(500)
-    //               .style("opacity", 0);
-    //         });
   }
 
-  g.append("g")
+  gax.append("g")
       .attr("class", "axis axis--x")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis);
 
-  g.append("g")
+  gax.append("g")
       .attr("class", "axis axis--y")
       .call(yAxis);
 
@@ -167,18 +172,17 @@ d3.text("data_empl.csv", function(error, raw) {
 });
 
 function zoomed(yObjs, xKey) {
+  var t = d3.event.transform,
+      xt = t.rescaleX(x);
   yObjs.forEach(function(yObj) {
-    var t = d3.event.transform,
-        xt = t.rescaleX(x);
-    yObj.path.attr("d", yObj.line.x(function(d) {
+    yObj.g.selectAll(".line").attr("d", yObj.line.x(function(d) {
       return xt(d[xKey]);
     }));
-  // g.selectAll(".circle")
-  //   .attr("cx", function (d) {
-  //     if (d) { return xt(d[yObj.yKey]); }
-  //   });
-    g.select(".axis--x").call(xAxis.scale(xt));
+    yObj.g.selectAll(".circle").attr("cx", function (d) {
+        if (d) { return xt(d[xKey]); }
+    });
   })
+  gax.select(".axis--x").call(xAxis.scale(xt));
 }
 
 </script>
