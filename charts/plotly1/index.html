@@ -1,8 +1,11 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
 <head>
   <!-- Plotly.js -->
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <!-- Numeric JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+  <script src="../../js/d3.v4.min.js"></script>
 </head>
 
 <body>
@@ -10,13 +13,38 @@
 <div id="myDiv"></div>
 <script>
 
-var data = [{
-values: [19, 26, 55],
-labels: ['Residential', 'Non-Residential', 'Utility'],
-type: 'pie'
-}];
+d3.text("data.csv", function(error, raw) {
+  if (error) throw error;
 
-Plotly.newPlot('myDiv', data);
+  var data = d3.dsvFormat(";").parse(raw);
+  var keys = Object.keys(data[0]); // get columns names
+  var xKey = keys[0];              // get x-column name
+  // convert values to numbers
+  data = data.map(row => {
+    row[xKey] = parseInt(row[xKey]);
+    keys.slice(1).forEach(yKey => {
+      row[yKey] = parseInt(row[yKey]);
+    })
+    return row;
+  });
+
+  var trace1 = {
+    x: [1, 2, 3, 4],
+    y: [10, 15, 13, 17],
+    type: 'scatter',
+    name: 'hello jak se pořád máte'
+  };
+
+  var trace2 = {
+    x: [1, 2, 3, 4],
+    y: [16, 5, 11, 9],
+    type: 'scatter'
+  };
+
+  var data = [trace1, trace2];
+
+  Plotly.newPlot('myDiv', data);
+});
 
 </script>
 </body>
