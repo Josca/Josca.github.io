@@ -1,215 +1,40 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
+<head>
+  <!-- Plotly.js -->
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <!-- Numeric JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+  <script src="../../js/d3.v4.min.js"></script>
+</head>
+
 <body>
-<!-- <svg width="960" height="500"></svg> -->
-<link rel="stylesheet" type="text/css" href="style.css">
-<script src="../../js/d3.v4.min.js"></script>
+
+<div id="myDiv"></div>
 <script>
-
-// Create svg object to draw on.
-var margin = {top: 20, right: 400, bottom: 30, left: 80},
-    width = 800,
-    height = 500
-
-var svg = d3.select("body").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-
-// x-value parsing method
-var parseDate = d3.timeParse("%Y");
-
-var x = d3.scaleTime().range([0, width]),
-    y = d3.scaleLinear().range([height, 0]);
-
-var xAxis = d3.axisBottom(x),
-    yAxis = d3.axisLeft(y);
-
-// Create line object for chart drawing.
-function createLine(xKey, yKey) {
-  return d3.line()
-      .x(function(d) { return x(d[xKey]); })
-      .y(function(d) { return y(d[yKey]); });
-}
-
-// Calculate max y value from all non-x columns.
-function maxY(data) {
-  var keys = Object.keys(data[0]);
-  var res = d3.max(keys.slice(1).map(yKey => d3.max(data.map(row => row[yKey]))));
-  return res;
-}
-
-// Define chart area (not to overlap drawing for axes).
-svg.append("defs").append("clipPath")  // Define chart range
-    .attr("id", "clip")
-  .append("rect")
-    .attr("width", width)
-    .attr("height", height);
-
-// Define the div for the tooltip
-var div = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0.8);
-
-var gax = svg.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 d3.text("data.csv", function(error, raw) {
   if (error) throw error;
 
   var data = d3.dsvFormat(";").parse(raw);
   var keys = Object.keys(data[0]); // get columns names
-  var xKey = keys[0];              // get x-column name
-  // convert values to numbers
-  data = data.map(row => {
-    row[xKey] = parseDate(row[xKey]);
-    keys.slice(1).forEach(yKey => {
-      row[yKey] = parseInt(row[yKey]);
-    })
-    return row;
+  var xKey = keys[0];              // get first column name
+  var series = keys.slice(1)
+                 .map(k => { return {name: k,
+                                     x: [],
+                                     y: [],
+                                     type: 'scatter'}});
+  // Load data to series.
+  data.map(row => {
+    x = parseInt(row[xKey]);
+    series.forEach(s => {
+      s.x.push(x);
+      s.y.push(1000 * parseInt(row[s.name]));
+    });
   });
 
-  var maxy = maxY(data);
-  y.domain([0, maxy * 1.1]);
-
-  var colors = d3.schemeCategory20;
-
-  var yObjs = [];
-
-  for(var i=1; i<keys.length; i++) {
-    var yKey = keys[i];
-    var line = createLine(xKey, yKey);
-
-    x.domain(d3.extent(data, function(d) { return d[xKey]; }));
-
-    var color = colors[i];
-
-    var yObj = {
-      line: line,
-      yKey: yKey,
-      visible: true,
-      color: color
-    }
-    yObjs.push(yObj);
-
-    var g = gax.append("g")
-              .attr("class", "y_grp")
-              .attr("yObj", yObj)
-
-    yObj.g = g;
-
-    g.selectAll("path")
-      .data([yObj])
-        .enter()
-          .append("path")
-            .datum(data)
-            .attr("class", "line")
-            .attr("d", line)
-            .style("stroke", color)
-
-    var r = 4;
-    var rFocus = 8;
-    g.selectAll("circle")
-      .data(data)
-        .enter()
-          .append("circle")
-            .attr("class", "circle")
-            .attr("fill", color)
-            .attr("r", r)
-            .attr("cx", function (d) { return x(d.date); })
-            .attr("cy", function (d) { return y(d[yKey]); })
-            .attr("label", yKey)  // save label here to show in tooltip
-            .attr("value", function(d) { return d[yKey]; })
-            .on("mouseover", function (d) {  // mouseover handler
-              this.setAttribute("r", rFocus);
-              div.transition()
-                  .duration(200)
-                  .style("opacity", .9);
-              div.html("Rok: " + d3.timeFormat("%Y")(d.date) +
-                  "<br/>" + this.getAttribute("label") + ": " + this.getAttribute("value"))
-                  .style("left", (d3.event.pageX) + "px")
-                  .style("top", (d3.event.pageY - 28) + "px");
-            }).on("mouseout", function () { // mouseout handler
-              this.setAttribute("r", r);
-              div.transition()
-                 .duration(500)
-                 .style("opacity", 0);
-            });
-  }
-
-// add legend
-  var legend = svg.append("g")
-
-  legend.selectAll("rect")
-    .data(yObjs)
-    .enter()
-      .append("rect")
-      .attr("width", 10)
-      .attr("height", 10)
-      .attr("x", width + margin.left + 30)
-      .attr("y", function(d,i) { return i * 20 + 50; })
-      .attr("fill", function(d) {
-        return d.visible ? d.color : "#f1f1f1";
-      })
-      .on("click", function(d) {
-        d.visible = !d.visible;
-
-        legend.selectAll("rect")
-          .transition()
-          .attr("fill", function(d) {
-            return d.visible ? d.color : "#f1f1f1";
-          });
-
-        if (d.visible) {
-          d.g.style("visibility", "visible");
-        } else{
-          d.g.style("visibility", "hidden");
-        }
-      });
-
-  legend.selectAll("text")
-    .data(yObjs)
-    .enter()
-      .append("text")
-      .attr("width", 10)
-      .attr("height", 10)
-      .attr("x", width + margin.left + 30 + 15)
-      .attr("y", function(d, i) { return i * 20 + 10 + 50; })
-      .text(d => { return d.yKey; });
-
-  gax.append("g")
-      .attr("class", "axis axis--x")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  gax.append("g")
-      .attr("class", "axis axis--y")
-      .call(yAxis);
-
-  var zoom = d3.zoom()
-      .scaleExtent([1, 32])
-      .translateExtent([[0, 0], [width, height]])
-      .extent([[0, 0], [width, height]])
-      .on("zoom", function () { return zoomed(yObjs, xKey); });
-
-  // Gratuitous intro zoom!
-  svg.call(zoom).transition()
+  Plotly.newPlot('myDiv', series);
 });
 
-function zoomed(yObjs, xKey) {
-  var t = d3.event.transform,
-      xt = t.rescaleX(x);
-  yObjs.forEach(function(yObj) {
-    yObj.g.selectAll(".line").attr("d", yObj.line.x(function(d) {
-      return xt(d[xKey]);
-    }));
-    yObj.g.selectAll(".circle").attr("cx", function (d) {
-        if (d) { return xt(d[xKey]); }
-    });
-  })
-  gax.select(".axis--x").call(xAxis.scale(xt));
-}
-
 </script>
-<p>Vyjádřeno v tisících Kč.</p>
-<p>Zdroj dat: <a href="https://monitor.statnipokladna.cz/2017/statni-rozpocet/#rozpocet-vydaje-organizacni">monitor.statnipokladna.cz</a></p>
 </body>
