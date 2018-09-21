@@ -7,7 +7,6 @@
 </head>
 
 <body>
-<h1>Rozpočty ministerstev ČR (2010 – 2017)</h1>
 
 <div id="myDiv"></div>
 <script>
@@ -32,7 +31,17 @@ d3.text("data.csv", function(error, raw) {
     });
   });
 
-  Plotly.newPlot('myDiv', series);
+  var layout = {
+  title: 'Rozpočty ministerstev ČR (2010 – 2017)',
+  xaxis: {
+    title: 'Rok'
+  },
+  yaxis: {
+    title: 'Výdaje (Kč)'
+  }
+};
+
+  Plotly.newPlot('myDiv', series, layout);
 });
 
 </script>
