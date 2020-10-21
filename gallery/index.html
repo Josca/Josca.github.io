@@ -11,6 +11,22 @@ body {font-family: Arial, Helvetica, sans-serif;}
   transition: 0.3s;
 }
 
+.close {
+  color: white;
+  position: absolute;
+  top: 10px;
+  right: 25px;
+  font-size: 35px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #999;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 #myImg:hover {opacity: 0.7;}
 
 /* The Modal (background) */
@@ -48,7 +64,10 @@ body {font-family: Arial, Helvetica, sans-serif;}
 </div>
 
 <!-- The Modal -->
-<div id="modalDiv" class="modal" onclick="nextImage();" onkeypress="">
+<div id="modalDiv" class="modal" onclick="toggleControl();">
+  <div id="controlDiv">
+    <span class="close" onclick="closeModal()">&times;</span>
+  </div>
   <img class="modal-content" id="modalImg">
 </div>
 
@@ -65,6 +84,15 @@ function closeModal() {
 function nextImage() {
   iImg = (iImg + 1) % imgsArr.length;
   document.getElementById("modalImg").src = imgsArr[iImg].src;
+}
+
+function toggleControl() {
+  var disp = document.getElementById("controlDiv").style.display;
+  if (disp == "none") {
+    document.getElementById("controlDiv").style.display = "block";
+  } else {
+    document.getElementById("controlDiv").style.display = "none";
+  }
 }
 
 function imgOnClick(imgSrc) {
