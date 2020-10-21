@@ -11,6 +11,10 @@ body {font-family: Arial, Helvetica, sans-serif;}
   transition: 0.3s;
 }
 
+#controlDiv {
+  position: relative;
+}
+
 .close {
   color: white;
   position: absolute;
@@ -25,6 +29,37 @@ body {font-family: Arial, Helvetica, sans-serif;}
   color: #999;
   text-decoration: none;
   cursor: pointer;
+}
+
+/* Next & previous buttons */
+.prev,
+.next {
+  cursor: pointer;
+  position: absolute;
+  width: auto;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  border-radius: 0 3px 3px 0;
+  user-select: none;
+  -webkit-user-select: none;
+  height: 100%;
+  width: 30%;
+  text-align: center;
+  opacity: 0.4;
+}
+
+/* Position the "next button" to the right */
+.next {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover,
+.next:hover {
+  /* background-color: rgba(50, 50, 50); */
 }
 
 #myImg:hover {opacity: 0.7;}
@@ -50,6 +85,11 @@ body {font-family: Arial, Helvetica, sans-serif;}
   max-height: 100%;
 }
 
+#caption {
+  color: white;
+  position: absolute;
+}
+
 </style>
 </head>
 <body>
@@ -64,11 +104,14 @@ body {font-family: Arial, Helvetica, sans-serif;}
 </div>
 
 <!-- The Modal -->
-<div id="modalDiv" class="modal" onclick="toggleControl();">
+<div id="modalDiv" class="modal">
+  <span class="next" onclick="nextImage();"></span>
+  <span class="prev" onclick="prevImage();"></span>
   <div id="controlDiv">
     <span class="close" onclick="closeModal()">&times;</span>
+    <span id="caption">Some description</span>
   </div>
-  <img class="modal-content" id="modalImg">
+  <img id="modalImg" class="modal-content" onclick="toggleControl();">
 </div>
 
 <script>
@@ -81,9 +124,22 @@ function closeModal() {
   document.getElementById("modalDiv").style.display = "none";
 }
 
-function nextImage() {
-  iImg = (iImg + 1) % imgsArr.length;
+function setImage(iImg) {
   document.getElementById("modalImg").src = imgsArr[iImg].src;
+  document.getElementById("caption").innerHTML = imgsArr[iImg].src;
+}
+
+function nextImage() {
+  incImage(1);
+}
+
+function prevImage() {
+  incImage(imgsArr.length - 1);
+}
+
+function incImage(inc) {
+  iImg = (iImg + inc) % imgsArr.length;
+  setImage(iImg);
 }
 
 function toggleControl() {
@@ -97,7 +153,6 @@ function toggleControl() {
 
 function imgOnClick(imgSrc) {
     document.getElementById("modalDiv").style.display = "block";
-    document.getElementById("modalImg").src = imgSrc;
 
     // find current image index
     for (i = 0; i < imgsArr.length; i++) {
@@ -106,6 +161,8 @@ function imgOnClick(imgSrc) {
         break;
       }
     }
+
+    setImage(iImg);
 }
 
 function loadImgsArray() {
