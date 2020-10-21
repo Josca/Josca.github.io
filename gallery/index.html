@@ -40,27 +40,50 @@ body {font-family: Arial, Helvetica, sans-serif;}
 
 <h2>Image Modal</h2>
 
-
-<img id="myImg" src="im1.JPG" onclick="imgOnClick(this.src);" style="width:100%;max-width:300px">
-<img id="myImg" src="im2.JPG" onclick="imgOnClick(this.src);" style="width:100%;max-width:300px">
-<img id="myImg" src="im3.JPG" onclick="imgOnClick(this.src);" style="width:100%;max-width:300px">
-<img id="myImg" src="im4.JPG" onclick="imgOnClick(this.src);" style="width:100%;max-width:300px">
+<div id="imgs">
+  <img id="myImg" src="im1.JPG" onclick="imgOnClick(this.src);" style="width:100%;max-width:300px">
+  <img id="myImg" src="im2.JPG" onclick="imgOnClick(this.src);" style="width:100%;max-width:300px">
+  <img id="myImg" src="im3.JPG" onclick="imgOnClick(this.src);" style="width:100%;max-width:300px">
+  <img id="myImg" src="im4.JPG" onclick="imgOnClick(this.src);" style="width:100%;max-width:300px">
+</div>
 
 <!-- The Modal -->
-<div id="modalDiv" class="modal" onclick="closeModal();" onkeypress="">
+<div id="modalDiv" class="modal" onclick="nextImage();" onkeypress="">
   <img class="modal-content" id="modalImg">
 </div>
 
 <script>
+
+var iImg = 0;
+var imgsArr = loadImgsArray();
 
 // Close the Modal
 function closeModal() {
   document.getElementById("modalDiv").style.display = "none";
 }
 
+function nextImage() {
+  iImg = (iImg + 1) % imgsArr.length;
+  document.getElementById("modalImg").src = imgsArr[iImg].src;
+}
+
 function imgOnClick(imgSrc) {
     document.getElementById("modalDiv").style.display = "block";
     document.getElementById("modalImg").src = imgSrc;
+
+    // find current image index
+    for (i = 0; i < imgsArr.length; i++) {
+      if (imgSrc == imgsArr[i].src) {
+        iImg = i;
+        break;
+      }
+    }
+}
+
+function loadImgsArray() {
+    var div = document.getElementById("imgs");
+    var imgs = div.getElementsByTagName("img");
+    return imgs;
 }
 
 </script>
